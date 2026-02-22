@@ -1,0 +1,17 @@
+# ความลับ (ห้ามเอาขึ้นเด็ดขาด!)
+.env
+.env.local
+
+# ไฟล์ขยะจาก Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# ไฟล์ขยะจาก Next.js / Node
+node_modules/
+.next/
+out/
+build/
+
+# ไฟล์ขยะจากระบบ (Mac)
+.DS_Store

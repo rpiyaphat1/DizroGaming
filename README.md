@@ -1,0 +1,2 @@
+# DizroGaming
+For partner
