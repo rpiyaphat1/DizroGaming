@@ -69,8 +69,8 @@ export default function TopupDetail() {
 
         setIsSubmitting(true);
         try {
-            // 🔥 เปลี่ยน Port จาก 5000 เป็น 5001 เพื่อให้ตรงกับ Backend ครับ
-            const res = await fetch('http://127.0.0.1:5001/api/buy', {
+            // 🔥 เปลี่ยนเป็น Relative Path เพื่อให้คุยกับ Vercel API หลังบ้านได้
+            const res = await fetch('/api/buy', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -80,7 +80,7 @@ export default function TopupDetail() {
                     package: selectedPackage.name,
                     price: selectedPackage.price,
                     uid: uid,
-                    aid: aid, // ✅ ใช้คีย์ aid ตามที่หลังบ้านรอรับ
+                    aid: aid,
                     server: currentGame.hasServer ? server : 'N/A',
                     imageFile: imageFile
                 })
@@ -105,7 +105,7 @@ export default function TopupDetail() {
             setPopup({
                 show: true,
                 status: 'error',
-                message: '❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ (เช็คพอร์ต 5001 หรือยัง?)'
+                message: '❌ ไม่สามารถเชื่อมต่อกับระบบได้ (โปรดเช็คการ Deploy บน Vercel)'
             });
         } finally {
             setIsSubmitting(false);
@@ -115,7 +115,7 @@ export default function TopupDetail() {
     const closePopup = () => {
         if (popup.status === 'success') {
             setImageFile(null);
-            router.push('/'); // ส่งกลับหน้าแรกเมื่อเติมสำเร็จ
+            router.push('/');
         }
         setPopup({ ...popup, show: false });
     };
@@ -150,7 +150,6 @@ export default function TopupDetail() {
 
     return (
         <div style={containerStyle}>
-            {/* Navbar */}
             <nav style={navStyle}>
                 <div style={navContainer}>
                     <img src="/DizroFont.png" style={logoStyle} onClick={() => router.push('/')} alt="logo" />
@@ -223,7 +222,6 @@ export default function TopupDetail() {
                 </div>
             </main>
 
-            {/* Modal ชำระเงิน */}
             {showPaymentModal && (
                 <div className="modal-overlay">
                     <div className="modal-content payment-modal">
@@ -244,7 +242,7 @@ export default function TopupDetail() {
 
                         <div style={{ textAlign: 'left', marginBottom: '20px' }}>
                             <label style={{ fontSize: '14px', color: '#ff007f', fontWeight: 'bold' }}>แนบสลิปการโอนเงิน:</label>
-                            <input type="file" accept="image/*" onChange={handleFileChange} style={{ marginTop: '10px', width: '100%' }} />
+                            <input type="file" accept="image/*" onChange={handleFileChange} style={{ marginTop: '10px', width: '100%', color: 'white' }} />
                         </div>
 
                         <div style={{ display: 'flex', gap: '10px' }}>
@@ -290,7 +288,6 @@ export default function TopupDetail() {
     );
 }
 
-// --- Global Styles ---
 const containerStyle = { backgroundColor: '#0f0f0f', minHeight: '100vh', display: 'flex', flexDirection: 'column', color: 'white' };
 const navStyle = { background: 'linear-gradient(90deg, #41a0ff 0%, #ff21ec 100%)', position: 'sticky', top: 0, zIndex: 1000 };
 const navContainer = { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', height: '100px' };

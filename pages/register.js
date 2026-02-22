@@ -27,7 +27,6 @@ export default function Register() {
         }
     }, []);
 
-    // 🚀 สั่งให้ Facebook Plugin ทำงานเมื่อโหลดหน้าเว็บเสร็จ
     useEffect(() => {
         if (isClient && window.FB) {
             window.FB.XFBML.parse();
@@ -52,7 +51,8 @@ export default function Register() {
 
         setIsLoading(true);
         try {
-            const res = await fetch('https://dizrogaming.onrender.com/api/index', {
+            // 🔥 เปลี่ยนเป็น Relative Path เพื่อใช้บน Vercel
+            const res = await fetch('/api/index', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -63,13 +63,13 @@ export default function Register() {
             });
             const data = await res.json();
             if (res.ok) {
-                alert("บันทึกสำเร็จลง MongoDB แล้วครับพี่!");
+                alert("บันทึกสมาชิกใหม่สำเร็จแล้วครับ!");
                 router.push('/');
             } else {
                 setMessage(data.message || "เกิดข้อผิดพลาดในการลงทะเบียน");
             }
         } catch (error) {
-            setMessage("ติดต่อ Server ไม่ได้ (เช็คว่ารัน Python อยู่หรือไม่?)");
+            setMessage("ไม่สามารถเชื่อมต่อระบบหลังบ้านได้ (ตรวจสอบ Vercel Deployment)");
         } finally {
             setIsLoading(false);
         }
@@ -133,7 +133,6 @@ export default function Register() {
                     <div style={footerRight}>
                         <h3 style={socialTitle}>ติดตามเราบนโซเชียล</h3>
                         <div style={fbWrapper}>
-                            {/* 🛡️ ป้องกัน Hydration Error */}
                             {isClient && (
                                 <div className="fb-page" data-href="https://www.facebook.com/DIZROGAMING" data-width="350" data-show-facepile="true">
                                     <blockquote cite="https://www.facebook.com/DIZROGAMING" className="fb-xfbml-parse-ignore">
@@ -149,7 +148,7 @@ export default function Register() {
     );
 }
 
-// --- Styles (คงเดิมตาม UI พี่) ---
+// --- Styles ---
 const containerStyle = { backgroundColor: '#0f0f0f', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Kanit, sans-serif' };
 const navStyle = { background: 'linear-gradient(90deg, #41a0ff 0%, #ff21ec 100%)', position: 'sticky', top: 0, zIndex: 1000 };
 const navContainer = { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', height: '100px' };
