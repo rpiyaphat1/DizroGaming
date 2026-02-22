@@ -48,6 +48,15 @@ def send_order_to_discord(data):
             image_base64 = image_base64.split(",")[1]
         img_data = base64.b64decode(image_base64)
         
+        # ⏰ ดึงเวลาที่ส่งมาจากหน้าบ้าน (Client's Thai Time) 
+        # ถ้าไม่มีให้ใช้เวลา Server + 7 ชั่วโมงแก้ขัดไปก่อน
+        order_time = data.get('timestamp')
+        if not order_time:
+            # กรณีหน้าบ้านไม่ได้ส่งมา ให้บวก 7 ชม. เอง
+            now_utc = datetime.datetime.utcnow()
+            now_thai = now_utc + datetime.timedelta(hours=7)
+            order_time = now_thai.strftime('%d/%m/%Y %H:%M:%S')
+
         message = (
             f"💰 **[Dizro Shop] New Order!**\n"
             f"━━━━━━━━━━━━━━━━━━━━\n"
@@ -61,7 +70,7 @@ def send_order_to_discord(data):
             f"🔑 AID: `{data.get('aid')}`\n"
             f"🌐 Server: `{data.get('server')}`\n"
             f"------------------------------------\n"
-            f"⏰ Time: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n"
+            f"⏰ Time: {order_time} (เวลาไทย)\n"
             f"━━━━━━━━━━━━━━━━━━━━"
         )
         
@@ -87,9 +96,11 @@ def handle_buy():
     print(f"📦 Processing order for: {data.get('username')}")
     
     if send_order_to_discord(data):
+        # สร้างรหัสอ้างอิงให้ลูกค้า
+        trans_id = f"DZ-{datetime.datetime.now().strftime('%M%S')}"
         return jsonify({
             "status": "success", 
-            "transId": f"DZ-{datetime.datetime.now().strftime('%M%S')}"
+            "transId": trans_id
         })
     else:
         return jsonify({"status": "error", "message": "Failed to send data to Discord"}), 500
@@ -122,6 +133,5 @@ def handle_request():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
-    # ระบบ Cloud จะเป็นคนกำหนด Port ให้เราเองครับ
     port = int(os.environ.get("PORT", 5001))
     app.run(host='0.0.0.0', port=port)

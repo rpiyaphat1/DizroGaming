@@ -68,8 +68,12 @@ export default function TopupDetail() {
         }
 
         setIsSubmitting(true);
+
+        // ⏰ สร้างเวลาไทยจากฝั่งเครื่องคนใช้ส่งไปเลย จะได้ตรงเป๊ะๆ
+        const now = new Date();
+        const thaiTime = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+
         try {
-            // 🔥 เปลี่ยนเป็น Relative Path เพื่อให้คุยกับ Vercel API หลังบ้านได้
             const res = await fetch('/api/buy', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -82,7 +86,8 @@ export default function TopupDetail() {
                     uid: uid,
                     aid: aid,
                     server: currentGame.hasServer ? server : 'N/A',
-                    imageFile: imageFile
+                    imageFile: imageFile,
+                    timestamp: thaiTime // ส่งเวลาไทยไปให้ Discord
                 })
             });
 
@@ -235,9 +240,11 @@ export default function TopupDetail() {
                             <img src="/payment.jpg" style={{ width: '250px', display: 'block' }} alt="qr code" />
                         </div>
 
-                        <div style={{ background: '#222', padding: '12px', borderRadius: '12px', marginBottom: '20px', textAlign: 'left' }}>
-                            <p style={{ fontSize: '13px', color: '#fff' }}>กสิกรไทย: <span style={{ color: '#00ff88', fontWeight: 'bold' }}>136-805-4883</span></p>
-                            <p style={{ fontSize: '12px', color: '#888' }}>ชื่อบัญชี: ดิศพงษ์ ชินอ่อน</p>
+                        {/* ✅ เพิ่มเบอร์ TrueMoney เรียบร้อยครับ */}
+                        <div style={{ background: '#222', padding: '15px', borderRadius: '12px', marginBottom: '20px', textAlign: 'left' }}>
+                            <p style={{ fontSize: '13px', color: '#fff' }}>🏦 กสิกรไทย: <span style={{ color: '#00ff88', fontWeight: 'bold' }}>136-805-4883</span></p>
+                            <p style={{ fontSize: '13px', color: '#fff', marginTop: '8px' }}>🧡 TrueMoney: <span style={{ color: '#ff9900', fontWeight: 'bold' }}>099-459-8462</span></p>
+                            <p style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>ชื่อบัญชี: ดิศพงษ์ ชินอ่อน</p>
                         </div>
 
                         <div style={{ textAlign: 'left', marginBottom: '20px' }}>
