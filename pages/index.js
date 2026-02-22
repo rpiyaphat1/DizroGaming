@@ -27,9 +27,22 @@ export default function Home() {
         }
     }, []);
 
+    // ✅ แก้ไข: บังคับให้ Facebook Plugin โหลดรูปขึ้นมาในหน้าแรก
     useEffect(() => {
-        if (isClient && window.FB) {
-            window.FB.XFBML.parse();
+        const loadFB = () => {
+            if (window.FB) {
+                try {
+                    window.FB.XFBML.parse();
+                } catch (e) {
+                    console.error("FB Parse Error:", e);
+                }
+            } else {
+                setTimeout(loadFB, 1000); // ถ้ายังไม่มาให้รอ 1 วิแล้วเช็คใหม่
+            }
+        };
+
+        if (isClient) {
+            loadFB();
         }
     }, [isClient]);
 
@@ -42,7 +55,7 @@ export default function Home() {
 
         setIsLoading(true);
         try {
-            // 🔥 เปลี่ยนมาใช้ Relative Path เพื่อให้ทำงานบน Vercel ได้ทันที
+            // 🔥 ใช้ Relative Path เพื่อให้คุยกับ Vercel ได้ทันที
             const res = await fetch('/api/index', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -217,6 +230,7 @@ export default function Home() {
     );
 }
 
+// --- Styles ห้ามแก้ตรงนี้ครับ ---
 const containerStyle = { backgroundColor: '#0f0f0f', color: 'white', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Kanit', sans-serif" };
 const navStyle = { background: 'linear-gradient(90deg, #41a0ff 0%, #ff21ec 100%)', position: 'sticky', top: 0, zIndex: 1000 };
 const navContainer = { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', height: '100px' };

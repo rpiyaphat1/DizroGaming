@@ -27,10 +27,21 @@ export default function Register() {
         }
     }, []);
 
+    // ✅ แก้ไข: บังคับให้ Facebook Plugin โหลดรูปขึ้นมา (Re-parse)
     useEffect(() => {
-        if (isClient && window.FB) {
-            window.FB.XFBML.parse();
-        }
+        const loadFB = () => {
+            if (isClient && window.FB) {
+                try {
+                    window.FB.XFBML.parse();
+                } catch (e) {
+                    console.error("FB Parse Error:", e);
+                }
+            } else if (isClient) {
+                // ถ้า SDK ยังไม่มา ให้รอ 1 วินาทีแล้วลองใหม่
+                setTimeout(loadFB, 1000);
+            }
+        };
+        loadFB();
     }, [isClient]);
 
     const handleLogout = () => {
@@ -51,7 +62,7 @@ export default function Register() {
 
         setIsLoading(true);
         try {
-            // 🔥 เปลี่ยนเป็น Relative Path เพื่อใช้บน Vercel
+            // 🔥 ใช้ Relative Path เพื่อให้ทำงานบน Vercel ได้ทันที
             const res = await fetch('/api/index', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

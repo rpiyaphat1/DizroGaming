@@ -34,11 +34,25 @@ export default function TopupDetail() {
         }
     }, [id]);
 
+    // ✅ แก้ไข: บังคับให้ Facebook Plugin โหลดรูปขึ้นมา (Re-parse)
     useEffect(() => {
-        if (isClient && window.FB) {
-            window.FB.XFBML.parse();
+        const loadFB = () => {
+            if (window.FB) {
+                try {
+                    window.FB.XFBML.parse();
+                } catch (e) {
+                    console.error("FB Parse Error:", e);
+                }
+            } else {
+                // ถ้า SDK ยังไม่มา ให้รอ 1 วินาทีแล้วลองใหม่
+                setTimeout(loadFB, 1000);
+            }
+        };
+
+        if (isClient) {
+            loadFB();
         }
-    }, [isClient]);
+    }, [isClient, id]);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -69,9 +83,17 @@ export default function TopupDetail() {
 
         setIsSubmitting(true);
 
-        // ⏰ สร้างเวลาไทยจากฝั่งเครื่องคนใช้ส่งไปเลย จะได้ตรงเป๊ะๆ
+        // ⏰ สร้างเวลาไทยจากฝั่งเครื่องคนใช้ (Client)
         const now = new Date();
-        const thaiTime = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+        const thaiTime = now.toLocaleString('th-TH', {
+            timeZone: 'Asia/Bangkok',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
 
         try {
             const res = await fetch('/api/buy', {
@@ -87,7 +109,7 @@ export default function TopupDetail() {
                     aid: aid,
                     server: currentGame.hasServer ? server : 'N/A',
                     imageFile: imageFile,
-                    timestamp: thaiTime // ส่งเวลาไทยไปให้ Discord
+                    timestamp: thaiTime
                 })
             });
 
@@ -240,7 +262,7 @@ export default function TopupDetail() {
                             <img src="/payment.jpg" style={{ width: '250px', display: 'block' }} alt="qr code" />
                         </div>
 
-                        {/* ✅ เพิ่มเบอร์ TrueMoney เรียบร้อยครับ */}
+                        {/* ✅ แก้ไข: เพิ่มเบอร์ TrueMoney เรียบร้อยครับ */}
                         <div style={{ background: '#222', padding: '15px', borderRadius: '12px', marginBottom: '20px', textAlign: 'left' }}>
                             <p style={{ fontSize: '13px', color: '#fff' }}>🏦 กสิกรไทย: <span style={{ color: '#00ff88', fontWeight: 'bold' }}>136-805-4883</span></p>
                             <p style={{ fontSize: '13px', color: '#fff', marginTop: '8px' }}>🧡 TrueMoney: <span style={{ color: '#ff9900', fontWeight: 'bold' }}>099-459-8462</span></p>
@@ -273,6 +295,33 @@ export default function TopupDetail() {
                 </div>
             )}
 
+            {/* ✅ แก้ไข: Footer กลับมาแล้ว! */}
+            <footer style={footerStyle}>
+                <div style={footerContainer}>
+                    <div style={footerLeft}>
+                        <h3 style={footerTitle}>DIZRO Gaming - บริการเติมเกมราคาถูก</h3>
+                        <p style={footerInfoText}>สะดวก รวดเร็ว ปลอดภัย บริการดี จริงใจ<br />LineOA: @dizrogaming | เบอร์โทร: 099-4598462</p>
+                    </div>
+                    <div style={footerRight}>
+                        <h3 style={socialTitle}>ติดตามเราบนโซเชียล</h3>
+                        <div style={fbWrapper}>
+                            {isClient && (
+                                <div
+                                    className="fb-page"
+                                    data-href="https://www.facebook.com/DIZROGAMING"
+                                    data-width="350"
+                                    data-show-facepile="true"
+                                >
+                                    <blockquote cite="https://www.facebook.com/DIZROGAMING" className="fb-xfbml-parse-ignore">
+                                        <a href="https://www.facebook.com/DIZROGAMING">DIZRO GAMING</a>
+                                    </blockquote>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
             <style jsx>{`
                 .main-layout { display: flex; gap: 40px; max-width: 1100px; margin: 30px auto; padding: 0 20px; min-height: 70vh; }
                 .left-section { flex: 1; text-align: center; }
@@ -295,15 +344,25 @@ export default function TopupDetail() {
     );
 }
 
-const containerStyle = { backgroundColor: '#0f0f0f', minHeight: '100vh', display: 'flex', flexDirection: 'column', color: 'white' };
+const containerStyle = { backgroundColor: '#0f0f0f', minHeight: '100vh', display: 'flex', flexDirection: 'column', color: 'white', fontFamily: "'Kanit', sans-serif" };
 const navStyle = { background: 'linear-gradient(90deg, #41a0ff 0%, #ff21ec 100%)', position: 'sticky', top: 0, zIndex: 1000 };
 const navContainer = { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', height: '100px' };
 const logoStyle = { height: '180px', cursor: 'pointer', objectFit: 'contain' };
 const menuItems = { display: 'flex', gap: '25px', alignItems: 'center' };
 const menuLink = { color: 'white', cursor: 'pointer', fontWeight: '500' };
-const dropdownStyle = { position: 'absolute', top: '35px', right: '0', backgroundColor: '#fff', borderRadius: '12px', padding: '8px 0', minWidth: '180px', zIndex: 1001 };
-const dropdownItem = { padding: '12px 20px', color: '#333', cursor: 'pointer', borderBottom: '1px solid #eee', textAlign: 'left' };
+const dropdownStyle = { position: 'absolute', top: '35px', right: '0', backgroundColor: '#fff', borderRadius: '12px', padding: '8px 0', minWidth: '180px', zIndex: 1001, color: '#333' };
+const dropdownItem = { padding: '12px 20px', cursor: 'pointer', borderBottom: '1px solid #eee', textAlign: 'left' };
 const bigGameImg = { width: '120px', borderRadius: '25px' };
 const sectionTitle = { color: '#ff007f', fontSize: '16px', marginBottom: '15px', fontWeight: 'bold' };
 const instructionBox = { marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' };
 const stepImg = { width: '100%', maxWidth: '280px', borderRadius: '12px', border: '1px solid #222' };
+
+// Footer Styles
+const footerStyle = { background: '#1a1a1a', padding: '60px 20px', borderTop: '2px solid #333', marginTop: 'auto' };
+const footerContainer = { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '50px' };
+const footerLeft = { textAlign: 'left', flex: 1, minWidth: '300px' };
+const footerTitle = { color: '#ffffff', marginBottom: '20px', fontSize: '1.4rem' };
+const footerInfoText = { fontSize: '1.1rem', lineHeight: '2', color: '#bbbbbb' };
+const footerRight = { flex: 0, minWidth: '350px', textAlign: 'left' };
+const socialTitle = { color: '#ffffff', marginBottom: '15px', fontSize: '1.2rem' };
+const fbWrapper = { borderRadius: '15px', overflow: 'hidden', width: '350px', boxShadow: '0 4px 15px rgba(0,0,0,0.5)' };
